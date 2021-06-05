@@ -1,5 +1,5 @@
-#ifndef _CREDIS_CLIENT_H_
-#define _CREDIS_CLIENT_H_
+#ifndef _CREDIS_CRUD_H_
+#define _CREDIS_CRUD_H_
 
 #include "credis/config.h"
 
