@@ -116,6 +116,61 @@ $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.$(DEPEXT)
 	@rm -f $(BUILDDIR)/$*.$(DEPEXT).tmp
 
+# examples
+EXAMDIR		:= examples
+EXABUILD	:= $(EXAMDIR)/objs
+EXATARGET	:= $(EXAMDIR)/bin
+
+EXAFLAGS	:= $(DEFINES)
+
+ifeq ($(TYPE), development)
+	EXAFLAGS += -g -D EXAMPLES_DEBUG -fasynchronous-unwind-tables
+else ifeq ($(TYPE), test)
+	EXAFLAGS += -g -fasynchronous-unwind-tables -D_FORTIFY_SOURCE=2 -fstack-protector -O2
+else ifeq ($(TYPE), beta)
+	EXAFLAGS += -g -D_FORTIFY_SOURCE=2 -O2
+else
+	EXAFLAGS += -D_FORTIFY_SOURCE=2 -O2
+endif
+
+# check which compiler we are using
+ifeq ($(CC), g++) 
+	EXAFLAGS += -std=c++11 -fpermissive
+else
+	EXAFLAGS += -std=c11 -Wpedantic -pedantic-errors
+endif
+
+ifeq ($(NATIVE), 1)
+	EXAFLAGS += -march=native
+endif
+
+# common flags
+EXAFLAGS += -Wall -Wno-unknown-pragmas
+
+EXALIBS		:= -Wl,-rpath=./$(TARGETDIR) -L ./$(TARGETDIR) -l credis
+EXAINC		:= -I ./$(INCDIR) -I ./$(EXAMDIR)
+
+EXAMPLES	:= $(shell find $(EXAMDIR) -type f -name *.$(SRCEXT))
+EXOBJS		:= $(patsubst $(EXAMDIR)/%,$(EXABUILD)/%,$(EXAMPLES:.$(SRCEXT)=.$(OBJEXT)))
+
+base: $(EXOBJS)
+	$(CC) $(EXAINC) ./$(EXABUILD)/basic.o -o ./$(EXATARGET)/basic $(EXALIBS)
+
+examples: $(EXOBJS)
+	@mkdir -p ./$(EXATARGET)
+	$(MAKE) $(EXOBJS)
+	$(MAKE) base
+
+# compile examples
+$(EXABUILD)/%.$(OBJEXT): $(EXAMDIR)/%.$(SRCEXT)
+	@mkdir -p $(dir $@)
+	$(CC) $(EXADEBUG) $(EXAFLAGS) $(INC) $(EXAINC) $(EXALIBS) -c -o $@ $<
+	@$(CC) $(EXADEBUG) $(EXAFLAGS) $(INCDEP) -MM $(EXAMDIR)/$*.$(SRCEXT) > $(EXABUILD)/$*.$(DEPEXT)
+	@cp -f $(EXABUILD)/$*.$(DEPEXT) $(EXABUILD)/$*.$(DEPEXT).tmp
+	@sed -e 's|.*:|$(EXABUILD)/$*.$(OBJEXT):|' < $(EXABUILD)/$*.$(DEPEXT).tmp > $(EXABUILD)/$*.$(DEPEXT)
+	@sed -e 's/.*://' -e 's/\\$$//' < $(EXABUILD)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(EXABUILD)/$*.$(DEPEXT)
+	@rm -f $(EXABUILD)/$*.$(DEPEXT).tmp
+
 # tests
 TESTDIR		:= test
 TESTBUILD	:= $(TESTDIR)/objs
@@ -149,10 +204,7 @@ TESTCOVS	:= $(patsubst $(TESTDIR)/%,$(TESTBUILD)/%,$(TESTS:.$(SRCEXT)=.$(SRCEXT)
 
 test: $(TESTOBJS)
 	@mkdir -p ./$(TESTTARGET)
-	@mkdir -p ./$(TESTTARGET)
-	$(CC) $(TESTINC) ./$(TESTBUILD)/model.o -o ./$(TESTTARGET)/model $(TESTLIBS)
-	$(CC) $(TESTINC) ./$(TESTBUILD)/select.o -o ./$(TESTTARGET)/select $(TESTLIBS)
-	$(CC) $(TESTINC) ./$(TESTBUILD)/version.o -o ./$(TESTTARGET)/version $(TESTLIBS)
+	$(CC) $(TESTINC) ./$(TESTBUILD)/crud.o -o ./$(TESTTARGET)/crud $(TESTLIBS)
 
 # compile tests
 $(TESTBUILD)/%.$(OBJEXT): $(TESTDIR)/%.$(SRCEXT)
@@ -186,13 +238,17 @@ $(TESTBUILD)/%.$(SRCEXT).$(COVEXT): $(TESTDIR)/%.$(SRCEXT)
 	gcov -r $< --object-directory $(dir $@)
 	mv $(notdir $@) ./$(TESTCOVDIR)
 
-clear: clean-objects clean-tests clean-coverage
+clear: clean-objects clean-examples clean-tests clean-coverage
 
 clean: clear
 	@$(RM) -rf $(TARGETDIR)
 
 clean-objects:
 	@$(RM) -rf $(BUILDDIR)
+
+clean-examples:
+	@$(RM) -rf $(EXABUILD)
+	@$(RM) -rf $(EXATARGET)
 
 clean-tests:
 	@$(RM) -rf $(TESTBUILD)
