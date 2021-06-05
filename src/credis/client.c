@@ -98,6 +98,7 @@ static unsigned int credis_client_connect (
 				);
 
 				redisFree (client->redis_context);
+				client->redis_context = NULL;
 			}
 
 			else {
