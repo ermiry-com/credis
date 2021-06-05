@@ -2,100 +2,127 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <cerver/utils/log.h>
-
 #include <hiredis/hiredis.h>
 
-#include "redis.h"
+#include "credis/collections/pool.h"
 
-static redisContext *redis_context = NULL;
+#include "credis/client.h"
+#include "credis/redis.h"
 
-static RedisStatus status = REDIS_STATUS_DISCONNECTED;
+static Credis credis = {
+	.hostname_len = 0,
+	.hostname = { 0 },
 
-static unsigned int redis_port = 6379;
-static char redis_host[REDIS_HOST_SIZE] = { 0 };
+	.port = REDIS_DEFAULT_PORT,
 
-static struct timeval timeout = { 1, 500000 };
+	.timeout = {
+		.tv_sec = REDIS_DEFAULT_TIMEOUT_SECS,
+		.tv_usec = REDIS_DEFAULT_TIMEOUT_MILI
+	},
 
-RedisStatus redis_get_status (void) { return status; }
+	.clients_pool_init = REDIS_DEFAULT_CLIENTS_POOL_INIT,
+	.clients_pool = NULL
+};
 
-void redis_set_hostname (const char *host) {
+const char *credis_get_hostname (void) {
+
+	return credis.hostname;
+
+}
+
+void credis_set_hostname (const char *host) {
 
 	if (host) {
-		(void) strncpy (redis_host, host, REDIS_HOST_SIZE - 1);
+		(void) strncpy (credis.hostname, host, REDIS_HOST_SIZE - 1);
+		credis.hostname_len = (unsigned int) strlen (credis.hostname);
 	}
 
 }
 
-void redis_set_port (const unsigned int port) {
+const unsigned int credis_get_port (void) {
 
-	redis_port = port;
+	return credis.port;
+
+}
+
+void credis_set_port (const unsigned int port) {
+
+	credis.port = port;
 
 }
 
 // sets the connection timeout
 // default to 1.5 seconds
-void redis_set_timeout (const long seconds, const long miliseconds) {
+void credis_set_timeout (
+	const long seconds, const long miliseconds
+) {
 
-	timeout.tv_sec = seconds;
-	timeout.tv_usec = miliseconds * 1000;
+	credis.timeout.tv_sec = seconds;
+	credis.timeout.tv_usec = miliseconds * 1000;
 
 }
 
-// connects to the redis server
-// returns 0 on success, 1 on error
-unsigned int redis_connect (void) {
+void credis_set_clients_pool_init (
+	const unsigned int clients_pool_init
+) {
+
+	credis.clients_pool_init = clients_pool_init;
+
+}
+
+CredisClient *credis_client_get (void) {
+
+	return (CredisClient *) credis_pool_pop (credis.clients_pool);
+
+}
+
+void credis_client_return (CredisClient *client) {
+
+	(void) credis_pool_push (credis.clients_pool, client);
+
+}
+
+static unsigned int credis_clients_pool_init (void) {
 
 	unsigned int retval = 1;
 
-	if (status == REDIS_STATUS_DISCONNECTED) {
-		redisOptions o = { 0 };
-		REDIS_OPTIONS_SET_TCP (&o, redis_host, redis_port);
-
-		redis_context = redisConnectWithOptions (&o);
-
-		if (redis_context) {
-			if (redis_context->err) {
-				cerver_log_error (
-					"REDIS - connection error: %s",
-					redis_context->errstr
-				);
-
-				redisFree (redis_context);
-			}
-
-			else {
-				// success
-				status = REDIS_STATUS_CONNECTED;
-				retval = 0;
-			}
+	credis.clients_pool = credis_pool_create (redis_client_destroy);
+	if (credis.clients_pool) {
+		credis_pool_set_create (credis.clients_pool, credis_client_create);
+		credis_pool_set_produce_if_empty (credis.clients_pool, true);
+		if (!credis_pool_init (
+			credis.clients_pool,
+			credis_client_create,
+			credis.clients_pool_init
+		)) {
+			retval = 0;
 		}
 
 		else {
-			cerver_log_error ("Failed to connect to redis!");
+			(void) fprintf (
+				stderr,
+				"[CREDIS][ERROR]: Failed to init clients pool!\n"
+			);
 		}
 	}
 
 	else {
-		cerver_log_warning ("Already connected to redis!");
+		(void) fprintf (
+			stderr,
+			"[CREDIS][ERROR]: Failed to create clients pool!\n"
+		);
 	}
 
 	return retval;
 
 }
 
-// disconnects from the redis server
-// returns 0 on success, 1 on error
-unsigned int redis_disconnect (void) {
+unsigned int credis_init (void) {
 
 	unsigned int retval = 1;
 
-	if (redis_context) {
-		if (status == REDIS_STATUS_CONNECTED) {
-			// disconnects and frees the context
-			redisFree (redis_context);
-			redis_context = NULL;
-
+	if (credis.hostname_len) {
+		if (!credis_clients_pool_init ()) {
 			retval = 0;
 		}
 	}
@@ -106,20 +133,33 @@ unsigned int redis_disconnect (void) {
 
 // pings the db to test for a success connection
 // returns 0 on success, 1 on error
-unsigned int redis_ping_db (void) {
+unsigned int credis_ping_db (void) {
 
 	unsigned int retval = 1;
 
-	if (redis_context) {
-		redisReply *reply = (redisReply *) redisCommand (redis_context, "PING");
+	CredisClient *client = credis_client_get ();
+	if (client) {
+		redisReply *reply = (redisReply *) redisCommand (
+			client->redis_context, "PING"
+		);
+
 		if (reply) {
-			(void) fprintf (stdout, "\n[REDIS][PING]: %s\n", reply->str);
+			(void) fprintf (stdout, "\n[CREDIS][PING]: %s\n", reply->str);
 			freeReplyObject (reply);
 
 			retval = 0;
 		}
+
+		credis_client_return (client);
 	}
 
 	return retval;
+
+}
+
+void credis_end (void) {
+
+	credis_pool_delete (credis.clients_pool);
+	credis.clients_pool = NULL;
 
 }
