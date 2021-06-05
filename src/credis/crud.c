@@ -62,16 +62,18 @@ unsigned int credis_exists (const char *key) {
 			);
 
 			if (reply) {
-				// #ifdef CREDIS_DEBUG
-				// (void) fprintf (
-				// 	stdout,
-				// 	"[CREDIS][EXISTS]: %s\n", reply->str
-				// );
-				// #endif
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][EXISTS]: %lld\n", reply->integer
+				);
+				#endif
+
+				if (reply->integer) {
+					retval = 0;
+				}
 
 				freeReplyObject (reply);
-
-				retval = 0;
 			}
 
 			credis_client_return (client);
@@ -398,16 +400,18 @@ unsigned int credis_del (const char *key) {
 			);
 
 			if (reply) {
-				// #ifdef CREDIS_DEBUG
-				// (void) fprintf (
-				// 	stdout,
-				// 	"[CREDIS][DEL]: %s\n", reply->str
-				// );
-				// #endif
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][DEL]: %lld\n", reply->integer
+				);
+				#endif
+
+				if (reply->integer) {
+					retval = 0;
+				}
 
 				freeReplyObject (reply);
-
-				retval = 0;
 			}
 
 			credis_client_return (client);
