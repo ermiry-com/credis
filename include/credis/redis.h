@@ -65,6 +65,11 @@ CREDIS_EXPORT unsigned int credis_init (void);
 // returns 0 on success, 1 on error
 CREDIS_EXPORT unsigned int credis_ping_db (void);
 
+// sets a key "oki" - value "doki" pair
+// to be used for testing
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_set_test (void);
+
 CREDIS_EXPORT void credis_end (void);
 
 #ifdef __cplusplus
