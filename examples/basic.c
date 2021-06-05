@@ -2,10 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <credis/redis.h>
 #include <credis/crud.h>
+#include <credis/redis.h>
+#include <credis/version.h>
 
 int main (int argc, const char **argv) {
+
+	credis_version_print_full ();
 
 	credis_set_hostname ("127.0.0.1");
 	
