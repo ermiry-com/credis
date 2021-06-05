@@ -7,6 +7,7 @@
 #include "credis/collections/pool.h"
 
 #include "credis/client.h"
+#include "credis/crud.h"
 #include "credis/redis.h"
 
 static Credis credis = {
@@ -154,6 +155,15 @@ unsigned int credis_ping_db (void) {
 	}
 
 	return retval;
+
+}
+
+// sets a key "oki" - value "doki" pair
+// to be used for testing
+// returns 0 on success, 1 on error
+unsigned int credis_set_test (void) {
+
+	return credis_set ("oki", "doki");
 
 }
 

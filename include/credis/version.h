@@ -1,10 +1,10 @@
 #ifndef _CREDIS_VERSION_H_
 #define _CREDIS_VERSION_H_
 
-#define CREDIS_VERSION				"0.1"
-#define CREDIS_VERSION_NAME			"Version 0.1"
+#define CREDIS_VERSION				"0.2"
+#define CREDIS_VERSION_NAME			"Version 0.2"
 #define CREDIS_VERSION_DATE			"05/06/2021"
-#define CREDIS_VERSION_TIME			"06:01 CST"
+#define CREDIS_VERSION_TIME			"06:20 CST"
 #define CREDIS_VERSION_AUTHOR		"Erick Salas"
 
 #ifdef __cplusplus
