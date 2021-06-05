@@ -1,5 +1,5 @@
-#ifndef _CERVER_TESTS_H_
-#define _CERVER_TESTS_H_
+#ifndef _CREDIS_TESTS_H_
+#define _CREDIS_TESTS_H_
 
 #include <stdlib.h>
 #include <stdio.h>
