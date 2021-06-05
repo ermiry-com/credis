@@ -1,41 +1,16 @@
+TYPE		:= development
+
+COVERAGE	:= 0
+
+DEBUG		:= 0
+
 SLIB		:= libcredis.so
 
-REDIS 		:= -l hiredis
-
-CLIBS		:= -l clibs
-
-DEVELOPMENT	:= -g
-
-CC          := gcc
-
-SRCDIR      := src
-INCDIR      := include
-BUILDDIR    := objs
-TARGETDIR   := bin
-
-TESTDIR		:= test
-TESTBUILD	:= $(TESTDIR)/objs
-TESTTARGET	:= $(TESTDIR)/bin
-
-SRCEXT      := c
-DEPEXT      := d
-OBJEXT      := o
-
-CFLAGS      := $(DEVELOPMENT) -Wall -Wno-unknown-pragmas -fPIC
-LIB         := -L /usr/local/lib $(REDIS) $(CLIBS)
-INC         := -I $(INCDIR) -I /usr/local/include
-INCDEP      := -I $(INCDIR)
-
-TESTFLAGS	:= -g $(DEFINES) -Wno-unknown-pragmas
-TESTLIBS	:= $(LIB) -L ./bin -l credis
-
-SOURCES     := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
-OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
-
-TESTMPLES	:= $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
-TESTOBJS	:= $(patsubst $(TESTDIR)/%,$(TESTBUILD)/%,$(TESTMPLES:.$(SRCEXT)=.$(OBJEXT)))
-
 all: directories $(SLIB)
+
+directories:
+	@mkdir -p $(TARGETDIR)
+	@mkdir -p $(BUILDDIR)
 
 install: $(SLIB)
 	install -m 644 ./bin/libcredis.so /usr/local/lib/
@@ -45,15 +20,85 @@ uninstall:
 	rm /usr/local/lib/libcredis.so
 	rm -r /usr/local/include/credis
 
-directories:
-	@mkdir -p $(TARGETDIR)
-	@mkdir -p $(BUILDDIR)
+HIREDIS		:= -l hiredis
 
-clean:
-	@$(RM) -rf $(BUILDDIR) 
-	@$(RM) -rf $(TARGETDIR)
-	@$(RM) -rf $(TESTBUILD)
-	@$(RM) -rf $(TESTTARGET)
+DEFINES		:= -D _GNU_SOURCE
+
+DEVELOPMENT := -D CREDIS_DEBUG
+
+CC          := gcc
+
+GCCVGTEQ8 	:= $(shell expr `gcc -dumpversion | cut -f1 -d.` \>= 8)
+
+SRCDIR      := src
+INCDIR      := include
+
+BUILDDIR    := objs
+TARGETDIR   := bin
+
+SRCEXT      := c
+DEPEXT      := d
+OBJEXT      := o
+
+COVDIR		:= coverage
+COVEXT		:= gcov
+
+# common flags
+# -Wconversion -march=native
+COMMON		:= -Wall -Wno-unknown-pragmas \
+				-Wfloat-equal -Wdouble-promotion -Wint-to-pointer-cast -Wwrite-strings \
+				-Wtype-limits -Wsign-compare -Wmissing-field-initializers \
+				-Wuninitialized -Wmaybe-uninitialized -Wempty-body \
+				-Wunused-parameter -Wunused-but-set-parameter -Wunused-result \
+				-Wformat -Wformat-nonliteral -Wformat-security -Wformat-overflow -Wformat-signedness -Wformat-truncation
+
+# main
+CFLAGS      := $(DEFINES)
+
+ifeq ($(TYPE), development)
+	CFLAGS += -g -fasynchronous-unwind-tables $(DEVELOPMENT)
+else ifeq ($(TYPE), test)
+	CFLAGS += -g -fasynchronous-unwind-tables -D_FORTIFY_SOURCE=2 -fstack-protector -O2
+	ifeq ($(COVERAGE), 1)
+		CFLAGS += -fprofile-arcs -ftest-coverage
+	endif
+else ifeq ($(TYPE), beta)
+	CFLAGS += -g -D_FORTIFY_SOURCE=2 -O2
+else
+	CFLAGS += -D_FORTIFY_SOURCE=2 -O2
+endif
+
+# check which compiler we are using
+ifeq ($(CC), g++) 
+	CFLAGS += -std=c++11 -fpermissive
+else
+	CFLAGS += -std=c11 -Wpedantic -pedantic-errors
+	# check for compiler version
+	ifeq "$(GCCVGTEQ8)" "1"
+    	CFLAGS += -Wcast-function-type
+	else
+		CFLAGS += -Wbad-function-cast
+	endif
+endif
+
+# common flags
+CFLAGS += -fPIC $(COMMON)
+
+LIB         := -L /usr/local/lib $(HIREDIS)
+
+ifeq ($(TYPE), test)
+	ifeq ($(COVERAGE), 1)
+		LIB += -lgcov --coverage
+	endif
+endif
+
+INC         := -I $(INCDIR) -I /usr/local/include
+INCDEP      := -I $(INCDIR)
+
+SOURCES     := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
+
+SRCCOVS		:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(SRCEXT).$(COVEXT)))
 
 # pull in dependency info for *existing* .o files
 -include $(OBJECTS:.$(OBJEXT)=.$(DEPEXT))
@@ -71,14 +116,43 @@ $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.$(DEPEXT)
 	@rm -f $(BUILDDIR)/$*.$(DEPEXT).tmp
 
+# tests
+TESTDIR		:= test
+TESTBUILD	:= $(TESTDIR)/objs
+TESTTARGET	:= $(TESTDIR)/bin
+TESTCOVDIR	:= $(COVDIR)/test
+
+TESTFLAGS	:= -g $(DEFINES) -Wall -Wno-unknown-pragmas -Wno-format
+
+ifeq ($(TYPE), test)
+	ifeq ($(COVERAGE), 1)
+		TESTFLAGS += -fprofile-arcs -ftest-coverage
+	endif
+endif
+
+TESTLIBS	:= $(PTHREAD) -L ./bin -l credis
+
+TESTLIBS += -Wl,-rpath=./$(TARGETDIR) -L ./$(TARGETDIR) -l credis
+
+ifeq ($(TYPE), test)
+	ifeq ($(COVERAGE), 1)
+		TESTLIBS += -lgcov --coverage
+	endif
+endif
+
+TESTINC		:= -I $(INCDIR) -I ./$(TESTDIR)
+
+TESTS		:= $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
+TESTOBJS	:= $(patsubst $(TESTDIR)/%,$(TESTBUILD)/%,$(TESTS:.$(SRCEXT)=.$(OBJEXT)))
+
+TESTCOVS	:= $(patsubst $(TESTDIR)/%,$(TESTBUILD)/%,$(TESTS:.$(SRCEXT)=.$(SRCEXT).$(COVEXT)))
+
 test: $(TESTOBJS)
 	@mkdir -p ./$(TESTTARGET)
-	$(CC) $(DEVELOPMENT) $(INC) ./$(TESTBUILD)/avl_test.o ./$(TESTBUILD)/user.o $(LIB) -L ./$(TARGETDIR) -l credis -o ./$(TESTTARGET)/avl_test
-	$(CC) $(DEVELOPMENT) $(INC) ./$(TESTBUILD)/c_strings.o $(LIB) -L ./$(TARGETDIR) -l credis -o ./$(TESTTARGET)/c_strings
-	$(CC) $(DEVELOPMENT) $(INC) ./$(TESTBUILD)/dlist_test.o $(LIB) -L ./$(TARGETDIR) -l credis -o ./$(TESTTARGET)/dlist_test
-	$(CC) $(DEVELOPMENT) $(INC) ./$(TESTBUILD)/htab_test.o $(LIB) -L ./$(TARGETDIR) -l credis -o ./$(TESTTARGET)/htab_test
-	$(CC) $(DEVELOPMENT) $(INC) ./$(TESTBUILD)/queue_test.o $(LIB) -L ./$(TARGETDIR) -l credis -o ./$(TESTTARGET)/queue_test
-	$(CC) $(DEVELOPMENT) $(INC) ./$(TESTBUILD)/thpool_test.o $(LIB) -L ./$(TARGETDIR) -l credis -o ./$(TESTTARGET)/thpool_test
+	@mkdir -p ./$(TESTTARGET)
+	$(CC) $(TESTINC) ./$(TESTBUILD)/model.o -o ./$(TESTTARGET)/model $(TESTLIBS)
+	$(CC) $(TESTINC) ./$(TESTBUILD)/select.o -o ./$(TESTTARGET)/select $(TESTLIBS)
+	$(CC) $(TESTINC) ./$(TESTBUILD)/version.o -o ./$(TESTTARGET)/version $(TESTLIBS)
 
 # compile tests
 $(TESTBUILD)/%.$(OBJEXT): $(TESTDIR)/%.$(SRCEXT)
@@ -90,4 +164,41 @@ $(TESTBUILD)/%.$(OBJEXT): $(TESTDIR)/%.$(SRCEXT)
 	@sed -e 's/.*://' -e 's/\\$$//' < $(TESTBUILD)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(TESTBUILD)/$*.$(DEPEXT)
 	@rm -f $(TESTBUILD)/$*.$(DEPEXT).tmp
 
-.PHONY: all clean test
+#coverage
+COVOBJS		:= $(SRCCOVS) $(TESTCOVS)
+
+test-coverage: $(COVOBJS)
+
+coverage-init:
+	@mkdir -p ./$(COVDIR)
+	@mkdir -p ./$(TESTCOVDIR)
+
+coverage: coverage-init test-coverage
+
+# get lib coverage reports
+$(BUILDDIR)/%.$(SRCEXT).$(COVEXT): $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p ./$(COVDIR)/$(dir $<)
+	gcov -r $< --object-directory $(dir $@)
+	mv $(notdir $@) ./$(COVDIR)/$<.gcov
+
+# get tests coverage reports
+$(TESTBUILD)/%.$(SRCEXT).$(COVEXT): $(TESTDIR)/%.$(SRCEXT)
+	gcov -r $< --object-directory $(dir $@)
+	mv $(notdir $@) ./$(TESTCOVDIR)
+
+clear: clean-objects clean-tests clean-coverage
+
+clean: clear
+	@$(RM) -rf $(TARGETDIR)
+
+clean-objects:
+	@$(RM) -rf $(BUILDDIR)
+
+clean-tests:
+	@$(RM) -rf $(TESTBUILD)
+	@$(RM) -rf $(TESTTARGET)
+
+clean-coverage:
+	@$(RM) -rf $(COVDIR)
+
+.PHONY: all clean clear test coverage
