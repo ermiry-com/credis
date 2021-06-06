@@ -82,11 +82,59 @@ CREDIS_EXPORT unsigned int credis_left_push (
 	const char *list, const char *value
 );
 
+// works like credis_left_push () but takes an int
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_left_push_int (
+	const char *list, const int value
+);
+
+// works like credis_left_push () but takes an unsigned int
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_left_push_unsigned (
+	const char *list, const unsigned int value
+);
+
+// works like credis_left_push () but takes a size_t
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_left_push_large (
+	const char *list, const size_t value
+);
+
+// works like credis_left_push () but takes a double
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_left_push_double (
+	const char *list, const double value
+);
+
 // inserts a new element on the tail (right)
 // a new list is created when its is ran against an empty key
 // returns 0 on success, 1 on error
 CREDIS_EXPORT unsigned int credis_right_push (
 	const char *list, const char *value
+);
+
+// works like credis_right_push () but takes an int
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_right_push_int (
+	const char *list, const int value
+);
+
+// works like credis_right_push () but takes an unsigned int
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_right_push_unsigned (
+	const char *list, const unsigned int value
+);
+
+// works like credis_right_push () but takes a size_t
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_right_push_large (
+	const char *list, const size_t value
+);
+
+// works like credis_right_push () but takes a double
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_right_push_double (
+	const char *list, const double value
 );
 
 // returns the length of the list
