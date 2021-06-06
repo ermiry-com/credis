@@ -1,6 +1,8 @@
 #ifndef _CREDIS_CRUD_H_
 #define _CREDIS_CRUD_H_
 
+#include <stddef.h>
+
 #include "credis/config.h"
 
 #ifdef __cplusplus
@@ -23,6 +25,30 @@ CREDIS_EXPORT unsigned int credis_exists (
 // returns 0 on success, 1 on error
 CREDIS_EXPORT unsigned int credis_set (
 	const char *key, const char *value
+);
+
+// sets a key value pair taking an integer
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_set_int (
+	const char *key, const int value
+);
+
+// sets a key value pair taking an unsigned int
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_set_unsigned (
+	const char *key, const unsigned int value
+);
+
+// sets a key value pair taking a size_t
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_set_large (
+	const char *key, const size_t value
+);
+
+// sets a key value pair taking a double
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_set_double (
+	const char *key, const double value
 );
 
 // increments a value by 1
