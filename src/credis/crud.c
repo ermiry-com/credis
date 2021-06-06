@@ -439,7 +439,7 @@ unsigned int credis_left_push (
 				#ifdef CREDIS_DEBUG
 				(void) fprintf (
 					stdout,
-					"[CREDIS][LPUSH]: %s\n", reply->str
+					"[CREDIS][LPUSH]: %lld\n", reply->integer
 				);
 				#endif
 
@@ -478,7 +478,7 @@ unsigned int credis_right_push (
 				#ifdef CREDIS_DEBUG
 				(void) fprintf (
 					stdout,
-					"[CREDIS][RPUSH]: %s\n", reply->str
+					"[CREDIS][RPUSH]: %lld\n", reply->integer
 				);
 				#endif
 
