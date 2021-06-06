@@ -121,6 +121,154 @@ unsigned int credis_set (
 
 }
 
+// sets a key value pair taking an integer
+// returns 0 on success, 1 on error
+unsigned int credis_set_int (
+	const char *key, const int value
+) {
+
+	unsigned int retval = 1;
+
+	if (key) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"SET %s %d",
+				key, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout, "[CREDIS][SET]: %s\n", reply->str
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// sets a key value pair taking an unsigned int
+// returns 0 on success, 1 on error
+unsigned int credis_set_unsigned (
+	const char *key, const unsigned int value
+) {
+
+	unsigned int retval = 1;
+
+	if (key) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"SET %s %u",
+				key, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout, "[CREDIS][SET]: %s\n", reply->str
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// sets a key value pair taking a size_t
+// returns 0 on success, 1 on error
+unsigned int credis_set_large (
+	const char *key, const size_t value
+) {
+
+	unsigned int retval = 1;
+
+	if (key) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"SET %s %lu",
+				key, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout, "[CREDIS][SET]: %s\n", reply->str
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// sets a key value pair taking a double
+// returns 0 on success, 1 on error
+unsigned int credis_set_double (
+	const char *key, const double value
+) {
+
+	unsigned int retval = 1;
+
+	if (key) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"SET %s %f",
+				key, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout, "[CREDIS][SET]: %s\n", reply->str
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
 // increments a value by 1
 // returns 0 on success, 1 on error
 unsigned int credis_incr (const char *key) {
