@@ -1,7 +1,7 @@
 ## General
-- Added method to set test key-value pair
-- Updated API reference with new method
-- Added workflow to create releases
+- Changed releases names in workflow
+- Added set methods for new each type
+- Added new set by type references
 
 ## Test
-- Added credis_set_test () unit test
+- Added set by type methods unit tests
