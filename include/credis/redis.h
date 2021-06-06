@@ -3,6 +3,8 @@
 
 #include <time.h>
 
+#include <hiredis/hiredis.h>
+
 #include <credis/collections/pool.h>
 
 #include "credis/client.h"
