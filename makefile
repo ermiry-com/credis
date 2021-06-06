@@ -147,7 +147,7 @@ endif
 # common flags
 EXAFLAGS += -Wall -Wno-unknown-pragmas
 
-EXALIBS		:= -Wl,-rpath=./$(TARGETDIR) -L ./$(TARGETDIR) -l credis
+EXALIBS		:= -Wl,-rpath=./$(TARGETDIR) -L ./$(TARGETDIR) $(HIREDIS) -l credis
 EXAINC		:= -I ./$(INCDIR) -I ./$(EXAMDIR)
 
 EXAMPLES	:= $(shell find $(EXAMDIR) -type f -name *.$(SRCEXT))
@@ -155,6 +155,7 @@ EXOBJS		:= $(patsubst $(EXAMDIR)/%,$(EXABUILD)/%,$(EXAMPLES:.$(SRCEXT)=.$(OBJEXT
 
 base: $(EXOBJS)
 	$(CC) $(EXAINC) ./$(EXABUILD)/basic.o -o ./$(EXATARGET)/basic $(EXALIBS)
+	$(CC) $(EXAINC) ./$(EXABUILD)/list.o -o ./$(EXATARGET)/list $(EXALIBS)
 
 examples: $(EXOBJS)
 	@mkdir -p ./$(EXATARGET)
@@ -187,7 +188,7 @@ endif
 
 TESTLIBS	:= $(PTHREAD) -L ./bin -l credis
 
-TESTLIBS += -Wl,-rpath=./$(TARGETDIR) -L ./$(TARGETDIR) -l credis
+TESTLIBS += -Wl,-rpath=./$(TARGETDIR) -L ./$(TARGETDIR) $(HIREDIS) -l credis
 
 ifeq ($(TYPE), test)
 	ifeq ($(COVERAGE), 1)
