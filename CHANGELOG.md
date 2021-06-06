@@ -1,7 +1,8 @@
 ## General
-- Changed releases names in workflow
-- Added set methods for new each type
-- Added new set by type references
+- Refactored redis push results types
+- Added list push methods for each type
+- Added hiredis header in main credis header
+- Added new list methods references
 
-## Test
-- Added set by type methods unit tests
+## Examples
+- Added dedicated list example source
