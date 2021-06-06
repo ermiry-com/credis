@@ -456,6 +456,158 @@ unsigned int credis_left_push (
 
 }
 
+// works like credis_left_push () but takes an int
+// returns 0 on success, 1 on error
+unsigned int credis_left_push_int (
+	const char *list, const int value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"LPUSH %s %d",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][LPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// works like credis_left_push () but takes an unsigned int
+// returns 0 on success, 1 on error
+unsigned int credis_left_push_unsigned (
+	const char *list, const unsigned int value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"LPUSH %s %u",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][LPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// works like credis_left_push () but takes a size_t
+// returns 0 on success, 1 on error
+unsigned int credis_left_push_large (
+	const char *list, const size_t value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"LPUSH %s %lu",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][LPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// works like credis_left_push () but takes a double
+// returns 0 on success, 1 on error
+unsigned int credis_left_push_double (
+	const char *list, const double value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"LPUSH %s %f",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][LPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
 // inserts a new element on the tail (right)
 // a new list is created when its is ran against an empty key
 // returns 0 on success, 1 on error
@@ -471,6 +623,158 @@ unsigned int credis_right_push (
 			redisReply *reply = (redisReply *) redisCommand (
 				client->redis_context,
 				"RPUSH %s %s",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][RPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// works like credis_right_push () but takes an int
+// returns 0 on success, 1 on error
+unsigned int credis_right_push_int (
+	const char *list, const int value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"RPUSH %s %d",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][RPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// works like credis_right_push () but takes an unsigned int
+// returns 0 on success, 1 on error
+unsigned int credis_right_push_unsigned (
+	const char *list, const unsigned int value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"RPUSH %s %u",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][RPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// works like credis_right_push () but takes a size_t
+// returns 0 on success, 1 on error
+unsigned int credis_right_push_large (
+	const char *list, const size_t value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"RPUSH %s %lu",
+				list, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][RPUSH]: %lld\n", reply->integer
+				);
+				#endif
+
+				freeReplyObject (reply);
+
+				retval = 0;
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return retval;
+
+}
+
+// works like credis_right_push () but takes a double
+// returns 0 on success, 1 on error
+unsigned int credis_right_push_double (
+	const char *list, const double value
+) {
+
+	unsigned int retval = 1;
+
+	if (list) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"RPUSH %s %f",
 				list, value
 			);
 
