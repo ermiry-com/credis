@@ -142,6 +142,16 @@ CREDIS_EXPORT long long credis_list_length (
 	const char *list
 );
 
+// removes the first count occurrences of elements
+// equal to element from the list stored at key
+// count > 0: remove elements equal to element moving from head to tail
+// count < 0: remove elements equal to element moving from tail to head
+// count = 0: remove all elements equal to element
+// returns the number of removed elements
+CREDIS_EXPORT unsigned int credis_list_remove (
+	const char *list, const int count, const char *value
+);
+
 // deletes a key value pair
 // returns 0 on success, 1 on error
 CREDIS_EXPORT unsigned int credis_del (
