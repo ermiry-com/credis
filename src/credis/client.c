@@ -54,11 +54,11 @@ void *credis_client_create (void) {
 	CredisClient *client = credis_client_new ();
 
 	if (client) {
-		REDIS_OPTIONS_SET_TCP (
-			&client->redis_options,
-			credis_get_hostname (),
-			credis_get_port ()
-		);
+		// REDIS_OPTIONS_SET_TCP (
+		// 	&client->redis_options,
+		// 	credis_get_hostname (),
+		// 	credis_get_port ()
+		// );
 
 		if (credis_client_connect (client)) {
 			// failed to connect to redis
@@ -85,8 +85,13 @@ static unsigned int credis_client_connect (
 	unsigned int retval = 1;
 
 	if (client->status == REDIS_STATUS_DISCONNECTED) {
-		client->redis_context = redisConnectWithOptions (
-			&client->redis_options
+		// client->redis_context = redisConnectWithOptions (
+		// 	&client->redis_options
+		// );
+
+		client->redis_context = redisConnect (
+			credis_get_hostname (),
+			credis_get_port ()
 		);
 
 		if (client->redis_context) {
