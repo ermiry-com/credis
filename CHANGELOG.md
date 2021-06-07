@@ -1,8 +1,1 @@
-## General
-- Added method to remove from list
-- Added credis_list_remove () reference
-
-## Test
-- Added dedicated script to run tests
-- Deleting keys in crud unit tests
-- Added dedicated list methods unit tests
+- Refactored client to use redisConnect (). Having problems with REDIS_OPTIONS_SET_TCP () & redisConnectWithOptions () when working inside docker and multiple networks
