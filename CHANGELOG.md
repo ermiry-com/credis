@@ -1,8 +1,8 @@
 ## General
-- Refactored redis push results types
-- Added list push methods for each type
-- Added hiredis header in main credis header
-- Added new list methods references
+- Added method to remove from list
+- Added credis_list_remove () reference
 
-## Examples
-- Added dedicated list example source
+## Test
+- Added dedicated script to run tests
+- Deleting keys in crud unit tests
+- Added dedicated list methods unit tests

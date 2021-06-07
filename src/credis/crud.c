@@ -836,6 +836,48 @@ long long credis_list_length (
 
 }
 
+// removes the first count occurrences of elements
+// equal to element from the list stored at key
+// count > 0: remove elements equal to element moving from head to tail
+// count < 0: remove elements equal to element moving from tail to head
+// count = 0: remove all elements equal to element
+// returns the number of removed elements
+unsigned int credis_list_remove (
+	const char *list, const int count, const char *value
+) {
+
+	unsigned int result = 0;
+
+	if (list && value) {
+		CredisClient *client = credis_client_get ();
+		if (client) {
+			redisReply *reply = (redisReply *) redisCommand (
+				client->redis_context,
+				"LREM %s %d %s",
+				list, count, value
+			);
+
+			if (reply) {
+				#ifdef CREDIS_DEBUG
+				(void) fprintf (
+					stdout,
+					"[CREDIS][LREM]: %lld\n", reply->integer
+				);
+				#endif
+
+				result = (unsigned int) (reply->integer < 0) ? 0 : reply->integer;
+
+				freeReplyObject (reply);
+			}
+
+			credis_client_return (client);
+		}
+	}
+
+	return result;
+
+}
+
 // deletes a key value pair
 // returns 0 on success, 1 on error
 unsigned int credis_del (const char *key) {

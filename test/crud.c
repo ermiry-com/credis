@@ -9,15 +9,21 @@
 
 static void credis_test_crud_exists (void) {
 
+	(void) credis_del ("oki");
+
 	test_check_unsigned_eq (credis_exists ("oki"), 1, NULL);
 
 	test_check_unsigned_eq (credis_set ("oki", "doki"), 0, NULL);
 
 	test_check_unsigned_eq (credis_exists ("oki"), 0, NULL);
 
+	test_check_unsigned_eq (credis_del ("oki"), 0, NULL);
+
 }
 
 static void credis_test_crud_set (void) {
+
+	(void) credis_del ("test");
 
 	test_check_unsigned_eq (credis_exists ("test"), 1, NULL);
 
@@ -25,9 +31,13 @@ static void credis_test_crud_set (void) {
 
 	test_check_unsigned_eq (credis_exists ("test"), 0, NULL);
 
+	test_check_unsigned_eq (credis_del ("test"), 0, NULL);
+
 }
 
 static void credis_test_crud_set_int (void) {
+
+	(void) credis_del ("entero");
 
 	test_check_unsigned_eq (credis_exists ("entero"), 1, NULL);
 
@@ -35,9 +45,13 @@ static void credis_test_crud_set_int (void) {
 
 	test_check_unsigned_eq (credis_exists ("entero"), 0, NULL);
 
+	test_check_unsigned_eq (credis_del ("entero"), 0, NULL);
+
 }
 
 static void credis_test_crud_set_unsigned (void) {
+
+	(void) credis_del ("unsigned");
 
 	test_check_unsigned_eq (credis_exists ("unsigned"), 1, NULL);
 
@@ -45,9 +59,13 @@ static void credis_test_crud_set_unsigned (void) {
 
 	test_check_unsigned_eq (credis_exists ("unsigned"), 0, NULL);
 
+	test_check_unsigned_eq (credis_del ("unsigned"), 0, NULL);
+
 }
 
 static void credis_test_crud_set_large (void) {
+
+	(void) credis_del ("largo");
 
 	test_check_unsigned_eq (credis_exists ("largo"), 1, NULL);
 
@@ -55,15 +73,21 @@ static void credis_test_crud_set_large (void) {
 
 	test_check_unsigned_eq (credis_exists ("largo"), 0, NULL);
 
+	test_check_unsigned_eq (credis_del ("largo"), 0, NULL);
+
 }
 
 static void credis_test_crud_set_double (void) {
+
+	(void) credis_del ("doble");
 
 	test_check_unsigned_eq (credis_exists ("doble"), 1, NULL);
 
 	test_check_unsigned_eq (credis_set_double ("doble", 10.1010), 0, NULL);
 
 	test_check_unsigned_eq (credis_exists ("doble"), 0, NULL);
+
+	test_check_unsigned_eq (credis_del ("doble"), 0, NULL);
 
 }
 
