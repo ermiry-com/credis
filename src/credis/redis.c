@@ -167,6 +167,22 @@ unsigned int credis_set_test (void) {
 
 }
 
+// checks if the test key "oki" exists
+// returns 0 on success, 1 on error
+unsigned int credis_exists_test (void) {
+
+	return credis_exists ("oki");
+
+}
+
+// removes the test key "oki"
+// returns 0 on success, 1 on error
+unsigned int credis_remove_test (void) {
+
+	return credis_del ("oki");
+
+}
+
 void credis_end (void) {
 
 	credis_pool_delete (credis.clients_pool);
