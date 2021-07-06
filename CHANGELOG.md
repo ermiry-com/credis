@@ -1,1 +1,6 @@
-- Refactored client to use redisConnect (). Having problems with REDIS_OPTIONS_SET_TCP () & redisConnectWithOptions () when working inside docker and multiple networks
+## General
+- Added more test key related methods
+- Added new test key methods references
+
+## Tests
+- Added test to set and fetch keys and values

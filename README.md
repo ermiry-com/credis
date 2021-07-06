@@ -68,6 +68,14 @@ CREDIS_EXPORT unsigned int credis_ping_db (void);
 // returns 0 on success, 1 on error
 CREDIS_EXPORT unsigned int credis_set_test (void);
 
+// checks if the test key "oki" exists
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_exists_test (void);
+
+// removes the test key "oki"
+// returns 0 on success, 1 on error
+CREDIS_EXPORT unsigned int credis_remove_test (void);
+
 // disposes credis internal values
 CREDIS_EXPORT void credis_end (void);
 ```
