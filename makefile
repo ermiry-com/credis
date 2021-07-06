@@ -206,6 +206,7 @@ TESTCOVS	:= $(patsubst $(TESTDIR)/%,$(TESTBUILD)/%,$(TESTS:.$(SRCEXT)=.$(SRCEXT)
 test: $(TESTOBJS)
 	@mkdir -p ./$(TESTTARGET)
 	$(CC) $(TESTINC) ./$(TESTBUILD)/crud.o -o ./$(TESTTARGET)/crud $(TESTLIBS)
+	$(CC) $(TESTINC) ./$(TESTBUILD)/fetch.o -o ./$(TESTTARGET)/fetch $(TESTLIBS)
 	$(CC) $(TESTINC) ./$(TESTBUILD)/list.o -o ./$(TESTTARGET)/list $(TESTLIBS)
 	$(CC) $(TESTINC) ./$(TESTBUILD)/test.o -o ./$(TESTTARGET)/test $(TESTLIBS)
 
